@@ -5,6 +5,8 @@ import { useNodeStore } from '../store/nodeStore';
 import { useAuthStore } from '../store/authStore';
 import { Save, Bold, Italic, Strikethrough, Code, Link as LinkIcon, Image as ImageIcon, Video, List, Quote, Type, Download } from 'lucide-react';
 import { exportNodeToZip } from '../lib/exportUtils';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export function Editor({ nodeId }: { nodeId: string }) {
   const { nodes, updateNode } = useNodeStore();
@@ -91,13 +93,35 @@ export function Editor({ nodeId }: { nodeId: string }) {
 
   // Custom components for react-markdown to support YouTube and styled code blocks
   const markdownComponents = {
-    code({ inline, className, children, ...props }: any) {
+    code({ node, inline, className, children, ...props }: any) {
+      const match = /language-(\w+)/.exec(className || '');
       return !inline ? (
-        <div className="bg-[#111] border border-[#333] p-4 rounded-md my-4 overflow-x-auto text-sm text-[#66fcf1] font-mono">
-          <code className={className} {...props}>{children}</code>
+        <div className="my-4 rounded-lg overflow-hidden border border-[#313244]">
+          <SyntaxHighlighter
+            style={{
+              ...vscDarkPlus,
+              'pre[class*="language-"]': {
+                ...vscDarkPlus['pre[class*="language-"]'],
+                background: '#1e1e2e',
+                margin: 0,
+                padding: '1rem',
+              },
+              'code[class*="language-"]': {
+                ...vscDarkPlus['code[class*="language-"]'],
+                background: '#1e1e2e',
+                textShadow: 'none',
+              }
+            }}
+            language={match ? match[1] : 'text'}
+            PreTag="div"
+            customStyle={{ fontSize: '14px', borderRadius: 0 }}
+            {...props}
+          >
+            {String(children).replace(/\n$/, '')}
+          </SyntaxHighlighter>
         </div>
       ) : (
-        <code className="bg-[#222] text-[#66fcf1] px-1 rounded font-mono text-sm" {...props}>
+        <code className="bg-[#1e1e2e] text-[#cdd6f4] px-1.5 py-0.5 rounded-md font-mono text-sm border border-[#313244]" {...props}>
           {children}
         </code>
       );

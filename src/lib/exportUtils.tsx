@@ -4,6 +4,8 @@ import html2canvas from 'html2canvas';
 import type { Node } from '../store/nodeStore';
 import { createRoot } from 'react-dom/client';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 // Find all descendants of a given node
 function getDescendants(nodeId: string, allNodes: Node[]): Node[] {
@@ -28,11 +30,47 @@ async function generatePDF(content: string, title: string): Promise<Blob> {
     container.className = 'prose max-w-none'; // Tailwind typography
     document.body.appendChild(container);
 
+    const markdownComponents = {
+      code({ node, inline, className, children, ...props }: any) {
+        const match = /language-(\w+)/.exec(className || '');
+        return !inline ? (
+          <div style={{ margin: '16px 0', borderRadius: '8px', overflow: 'hidden', border: '1px solid #313244', backgroundColor: '#1e1e2e' }}>
+            <SyntaxHighlighter
+              style={{
+                ...vscDarkPlus,
+                'pre[class*="language-"]': {
+                  ...vscDarkPlus['pre[class*="language-"]'],
+                  background: '#1e1e2e',
+                  margin: 0,
+                  padding: '16px',
+                },
+                'code[class*="language-"]': {
+                  ...vscDarkPlus['code[class*="language-"]'],
+                  background: '#1e1e2e',
+                  textShadow: 'none',
+                }
+              }}
+              language={match ? match[1] : 'text'}
+              PreTag="div"
+              customStyle={{ fontSize: '14px', borderRadius: 0 }}
+              {...props}
+            >
+              {String(children).replace(/\n$/, '')}
+            </SyntaxHighlighter>
+          </div>
+        ) : (
+          <code style={{ backgroundColor: '#1e1e2e', color: '#cdd6f4', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '14px', border: '1px solid #313244' }} {...props}>
+            {children}
+          </code>
+        );
+      }
+    };
+
     const root = createRoot(container);
     root.render(
       <div>
         <h1 style={{ borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>{title}</h1>
-        <ReactMarkdown>{content}</ReactMarkdown>
+        <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
       </div>
     );
 
