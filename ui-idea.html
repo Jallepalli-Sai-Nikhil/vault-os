@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vault OS — Your knowledge, locked and alive.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500;1,9..144,600&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --hue:152;
+  --ff-display:'Fraunces', serif;
+  --ff-body:'Inter', sans-serif;
+  --ff-mono:'IBM Plex Mono', monospace;
+}
+html[data-mode="dark"]{
+  --bg: hsl(var(--hue) 32% 5%);
+  --bg-soft: hsl(var(--hue) 26% 8%);
+  --surface: hsl(var(--hue) 22% 10%);
+  --surface-2: hsl(var(--hue) 20% 13%);
+  --line: hsl(var(--hue) 18% 20%);
+  --text: hsl(var(--hue) 18% 96%);
+  --text-soft: hsl(var(--hue) 10% 68%);
+  --text-dim: hsl(var(--hue) 8% 44%);
+  --accent: hsl(var(--hue) 80% 58%);
+  --accent-strong: hsl(var(--hue) 85% 68%);
+  --accent-glow: hsl(var(--hue) 80% 58% / 0.22);
+  --on-accent: hsl(var(--hue) 40% 8%);
+  --section-bg-1: hsl(var(--hue) 32% 5%);
+  --section-bg-2: hsl(var(--hue) 28% 7%);
+  --section-bg-3: hsl(var(--hue) 24% 9%);
+  --section-bg-4: hsl(var(--hue) 20% 6%);
+}
+html[data-mode="light"]{
+  --bg: hsl(var(--hue) 48% 97%);
+  --bg-soft: hsl(var(--hue) 38% 93%);
+  --surface: hsl(var(--hue) 35% 99%);
+  --surface-2: hsl(var(--hue) 30% 94%);
+  --line: hsl(var(--hue) 24% 83%);
+  --text: hsl(var(--hue) 35% 9%);
+  --text-soft: hsl(var(--hue) 16% 32%);
+  --text-dim: hsl(var(--hue) 12% 50%);
+  --accent: hsl(var(--hue) 70% 40%);
+  --accent-strong: hsl(var(--hue) 78% 33%);
+  --accent-glow: hsl(var(--hue) 70% 40% / 0.15);
+  --on-accent: hsl(var(--hue) 25% 99%);
+  --section-bg-1: hsl(var(--hue) 48% 97%);
+  --section-bg-2: hsl(var(--hue) 40% 93%);
+  --section-bg-3: hsl(var(--hue) 35% 95%);
+  --section-bg-4: hsl(var(--hue) 30% 91%);
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ background:var(--bg); scroll-behavior:auto; }
+body{
+  background:var(--bg); color:var(--text); font-family:var(--ff-body);
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+  transition:background .6s ease, color .6s ease;
+}
+::selection{ background:var(--accent); color:var(--on-accent); }
+a{ color:inherit; text-decoration:none; }
+.mono{ font-family:var(--ff-mono); }
+.wrap{ max-width:1280px; margin:0 auto; padding:0 40px; }
+
+/* ── CURSOR ── */
+.cursor-dot{ position:fixed; top:0; left:0; width:7px; height:7px; border-radius:50%; background:var(--accent); pointer-events:none; z-index:9999; transform:translate(-50%,-50%); }
+.cursor-ring{ position:fixed; top:0; left:0; width:32px; height:32px; border-radius:50%; border:1.5px solid var(--accent); pointer-events:none; z-index:9998; transform:translate(-50%,-50%); }
+.cursor-label{ position:fixed; top:0; left:0; pointer-events:none; z-index:9999; opacity:0; transform:translate(-50%,-50%) scale(.8); font-family:var(--ff-mono); font-size:11px; letter-spacing:.04em; color:var(--on-accent); background:var(--accent); padding:6px 12px; border-radius:100px; white-space:nowrap; }
+@media (hover:none){ .cursor-dot,.cursor-ring,.cursor-label{ display:none; } }
+
+/* ── TOPBAR ── */
+.topbar{ position:fixed; top:0; left:0; right:0; z-index:600; padding:18px 0; }
+.topbar::before{ content:""; position:absolute; inset:0; background:var(--bg); opacity:.85; backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid var(--line); transition:opacity .5s; }
+.topbar-row{ display:flex; align-items:center; gap:24px; justify-content:space-between; position:relative; z-index:1; }
+.brand{ font-family:var(--ff-display); font-weight:700; font-size:19px; letter-spacing:.01em; display:flex; align-items:center; gap:8px; }
+.brand .led{ width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); animation:pulse-led 2.4s ease-in-out infinite; }
+@keyframes pulse-led{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+.brand span{ color:var(--accent); font-style:italic; font-weight:500; }
+
+/* Theme controls */
+.theme-controls{ display:flex; align-items:center; gap:12px; }
+
+/* Color picker button + dropdown */
+.color-picker-wrap{ position:relative; }
+.color-picker-btn{
+  width:34px; height:34px; border-radius:50%; border:1.5px solid var(--line);
+  background:var(--surface); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:border-color .25s, transform .3s;
+  overflow:hidden; position:relative;
+}
+.color-picker-btn:hover{ border-color:var(--accent); transform:rotate(30deg); }
+.color-picker-btn svg{ width:16px; height:16px; }
+.color-picker-btn .btn-swatch-ring{
+  position:absolute; inset:3px; border-radius:50%;
+  background:conic-gradient(
+    hsl(152,75%,52%) 0deg 24deg,
+    hsl(165,75%,52%) 24deg 48deg,
+    hsl(178,75%,52%) 48deg 72deg,
+    hsl(190,75%,52%) 72deg 96deg,
+    hsl(200,75%,52%) 96deg 120deg,
+    hsl(212,75%,52%) 120deg 144deg,
+    hsl(225,75%,52%) 144deg 168deg,
+    hsl(243,75%,52%) 168deg 192deg,
+    hsl(265,75%,52%) 192deg 216deg,
+    hsl(300,75%,52%) 216deg 240deg,
+    hsl(330,75%,52%) 240deg 264deg,
+    hsl(350,75%,52%) 264deg 288deg,
+    hsl(12,75%,52%) 288deg 312deg,
+    hsl(38,75%,52%) 312deg 336deg,
+    hsl(90,75%,52%) 336deg 360deg
+  );
+}
+
+.color-dropdown{
+  position:absolute; top:calc(100% + 10px); right:0;
+  background:var(--surface); border:1px solid var(--line); border-radius:16px;
+  padding:14px; width:224px; z-index:700;
+  opacity:0; transform:translateY(-8px) scale(.95); pointer-events:none;
+  transition:opacity .25s ease, transform .25s ease;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);
+}
+.color-dropdown.open{ opacity:1; transform:translateY(0) scale(1); pointer-events:all; }
+.color-dropdown-label{ font-family:var(--ff-mono); font-size:10px; letter-spacing:.2em; color:var(--text-dim); text-transform:uppercase; margin-bottom:10px; display:block; }
+.swatch-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:7px; }
+.swatch{
+  width:100%; aspect-ratio:1; border-radius:50%; cursor:pointer;
+  border:2px solid transparent; transition:transform .2s, border-color .2s;
+  position:relative;
+}
+.swatch:hover{ transform:scale(1.2); }
+.swatch.active{ border-color:var(--text); transform:scale(1.15); }
+.swatch[title]::after{ content:attr(title); position:absolute; bottom:calc(100%+5px); left:50%; transform:translateX(-50%); font-family:var(--ff-mono); font-size:9px; letter-spacing:.08em; background:var(--surface-2); color:var(--text-soft); padding:3px 7px; border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s; }
+.swatch:hover::after{ opacity:1; }
+
+/* Mode toggle */
+.mode-toggle{ width:34px; height:34px; border-radius:50%; border:1.5px solid var(--line); background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); transition:border-color .25s, transform .3s; }
+.mode-toggle:hover{ border-color:var(--accent); transform:rotate(180deg); }
+.mode-toggle svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.6; }
+
+.login-btn{ font-family:var(--ff-mono); font-size:12px; letter-spacing:.06em; padding:11px 24px; border-radius:100px; background:var(--accent); color:var(--on-accent); border:none; cursor:pointer; transition:opacity .2s, transform .2s; }
+.login-btn:hover{ opacity:.88; transform:scale(1.03); }
+
+/* ── SCROLL CONTAINER ── */
+#main-scroll{ position:relative; }
+
+/* ── VERTICAL SECTIONS ── */
+.v-section{
+  position:relative; min-height:100vh; display:flex; align-items:center;
+  overflow:hidden; will-change:transform, opacity;
+}
+.v-section .wrap{ position:relative; z-index:2; }
+
+/* Red section that moves in (visually) */
+.section-lens{
+  position:absolute; inset:0; z-index:1;
+  background:var(--section-bg-2);
+  transform:scale(0.88); border-radius:24px;
+  opacity:0;
+  will-change:transform, opacity, border-radius;
+}
+
+/* hero */
+#hero{ min-height:100vh; background:var(--section-bg-1); }
+.blob{ position:fixed; width:560px; height:560px; border-radius:50%; background:radial-gradient(circle, var(--accent) 0%, transparent 70%); filter:blur(72px); opacity:.15; pointer-events:none; z-index:0; top:0; left:0; transform:translate(-50%,-50%); }
+.eyebrow{ font-family:var(--ff-mono); font-size:11px; letter-spacing:.28em; color:var(--accent); text-transform:uppercase; margin-bottom:22px; display:flex; align-items:center; gap:10px; }
+.eyebrow::before{ content:""; width:20px; height:1px; background:var(--accent); }
+h1.hero-h1{ font-family:var(--ff-display); font-weight:600; font-size:clamp(40px,7.6vw,96px); line-height:1.0; letter-spacing:-0.015em; max-width:920px; }
+.tilt-word{ display:inline-block; cursor:default; }
+.hero-h1 em{ font-style:italic; font-weight:500; color:var(--accent); }
+.hero-sub{ max-width:520px; font-size:16.5px; line-height:1.75; color:var(--text-soft); margin:30px 0 38px; }
+.hero-cta-row{ display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+.btn-ghost{ font-family:var(--ff-mono); font-size:12px; letter-spacing:.05em; padding:11px 24px; border-radius:100px; border:1.5px solid var(--line); cursor:pointer; background:transparent; color:var(--text); transition:border-color .25s, color .25s; }
+.btn-ghost:hover{ border-color:var(--accent); color:var(--accent); }
+.scroll-cue{ position:absolute; bottom:40px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:8px; font-family:var(--ff-mono); font-size:10px; color:var(--text-dim); letter-spacing:.16em; }
+.scroll-cue .ln{ width:1px; height:32px; background:var(--line); position:relative; overflow:hidden; }
+.scroll-cue .ln::after{ content:""; position:absolute; top:-100%; left:0; width:100%; height:100%; background:var(--accent); animation:drip 2s infinite ease-in-out; }
+@keyframes drip{ 0%{top:-100%;} 65%{top:100%;} 100%{top:100%;} }
+
+/* ── HORIZONTAL SCROLL WRAPPER ── */
+#horiz-outer{
+  position:relative;
+  overflow:hidden;
+}
+#horiz-track{
+  display:flex;
+  width:max-content;
+  will-change:transform;
+}
+.h-panel{
+  width:100vw; min-height:100vh;
+  display:flex; align-items:center;
+  flex-shrink:0; position:relative; overflow:hidden;
+}
+.h-panel:nth-child(1){ background:var(--section-bg-2); }
+.h-panel:nth-child(2){ background:var(--section-bg-3); }
+.h-panel:nth-child(3){ background:var(--section-bg-1); }
+.h-panel:nth-child(4){ background:var(--section-bg-4); }
+
+/* Panel indicator dots */
+.h-progress{
+  position:absolute; bottom:36px; left:50%; transform:translateX(-50%);
+  display:flex; gap:8px; z-index:10;
+}
+.h-dot{ width:6px; height:6px; border-radius:50%; background:var(--line); transition:background .4s, transform .4s; }
+.h-dot.active{ background:var(--accent); transform:scale(1.4); }
+
+/* Horizontal panel label */
+.h-panel-eyebrow{ font-family:var(--ff-mono); font-size:10.5px; letter-spacing:.28em; color:var(--accent); text-transform:uppercase; margin-bottom:18px; display:flex; align-items:center; gap:10px; }
+.h-panel-eyebrow::before{ content:""; width:20px; height:1px; background:var(--accent); }
+.h-panel-title{ font-family:var(--ff-display); font-weight:600; font-size:clamp(28px,4.5vw,58px); line-height:1.05; max-width:800px; margin-bottom:20px; }
+.h-panel-title em{ font-style:italic; color:var(--accent); font-weight:500; }
+.h-panel-body{ font-size:15.5px; line-height:1.72; color:var(--text-soft); max-width:580px; }
+
+/* Features tiles */
+.feat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:32px; max-width:960px; }
+@media(max-width:860px){ .feat-grid{ grid-template-columns:1fr 1fr; } }
+.feat-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:24px;
+  position:relative; overflow:hidden; transition:border-color .3s, transform .35s;
+  will-change:transform;
+}
+.feat-card:hover{ border-color:var(--accent); transform:translateY(-5px); }
+.feat-card.wide{ grid-column:span 2; }
+@media(max-width:860px){ .feat-card.wide{ grid-column:span 1; } }
+.feat-num{ position:absolute; top:20px; right:20px; font-family:var(--ff-mono); font-size:10px; color:var(--text-dim); letter-spacing:.15em; }
+.feat-icon{ width:28px; height:28px; margin-bottom:16px; }
+.feat-icon svg{ width:100%; height:100%; stroke:var(--accent); fill:none; stroke-width:1.5; }
+.feat-name{ font-family:var(--ff-display); font-weight:600; font-size:18px; margin-bottom:8px; position:relative; display:inline-block; }
+.feat-name .dup{ position:absolute; left:0; top:0; color:var(--accent); clip-path:inset(0 100% 0 0); transition:clip-path .4s ease; }
+.feat-card:hover .feat-name .dup{ clip-path:inset(0 0 0 0); }
+.feat-card p{ font-size:13px; color:var(--text-soft); line-height:1.6; max-width:28ch; }
+
+/* Stats panel */
+.stats-row{ display:flex; gap:40px; flex-wrap:wrap; margin-top:36px; }
+.stat{ flex:1; min-width:150px; }
+.stat-num{ font-family:var(--ff-display); font-size:clamp(40px,6vw,72px); font-weight:600; color:var(--accent); line-height:1; }
+.stat-label{ font-family:var(--ff-mono); font-size:11px; letter-spacing:.18em; color:var(--text-dim); text-transform:uppercase; margin-top:8px; }
+
+/* Philosophy panel */
+.phil-list{ margin-top:32px; display:flex; flex-direction:column; gap:0; }
+.phil-item{ display:flex; gap:20px; align-items:flex-start; padding:20px 0; border-bottom:1px solid var(--line); opacity:.55; transition:opacity .4s; cursor:default; }
+.phil-item:hover{ opacity:1; }
+.phil-item:first-child{ border-top:1px solid var(--line); }
+.phil-n{ font-family:var(--ff-mono); font-size:11px; color:var(--accent); letter-spacing:.1em; min-width:28px; margin-top:3px; }
+.phil-text h4{ font-family:var(--ff-display); font-weight:500; font-size:20px; margin-bottom:4px; }
+.phil-text p{ font-size:13px; color:var(--text-soft); line-height:1.6; max-width:44ch; }
+
+/* Horizontal panel nav arrows */
+.h-nav{ position:absolute; top:50%; transform:translateY(-50%); z-index:10; width:42px; height:42px; border-radius:50%; border:1.5px solid var(--line); background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:border-color .25s; }
+.h-nav:hover{ border-color:var(--accent); }
+.h-nav svg{ width:16px; height:16px; stroke:var(--text); fill:none; stroke-width:2; }
+.h-nav.prev{ left:24px; }
+.h-nav.next{ right:24px; }
+
+/* Slide-in content from right */
+.from-right{ transform:translateX(80px); opacity:0; }
+
+/* ── FOOTER ── */
+#footer{
+  min-height:100vh; background:var(--bg); position:relative; overflow:hidden;
+  display:flex; align-items:center; padding:120px 0 60px;
+}
+.footer-bg-grid{
+  position:absolute; inset:0; z-index:0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  opacity:.35;
+}
+.footer-glow{
+  position:absolute; width:600px; height:600px; border-radius:50%;
+  background:radial-gradient(circle, var(--accent) 0%, transparent 68%);
+  filter:blur(90px); opacity:.10; pointer-events:none; z-index:0;
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  animation:footer-pulse 4s ease-in-out infinite;
+}
+@keyframes footer-pulse{ 0%,100%{opacity:.10; transform:translate(-50%,-50%) scale(1);} 50%{opacity:.18; transform:translate(-50%,-50%) scale(1.12);} }
+
+.foot-inner{ position:relative; z-index:2; width:100%; }
+.foot-top{ display:flex; justify-content:space-between; align-items:flex-end; gap:40px; flex-wrap:wrap; margin-bottom:64px; }
+.foot-title{ font-family:var(--ff-display); font-weight:600; font-size:clamp(32px,6vw,72px); line-height:1.02; max-width:640px; }
+.foot-title em{ font-style:italic; color:var(--accent); font-weight:500; }
+
+/* Animated ticker */
+.foot-ticker-wrap{ overflow:hidden; border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:14px 0; margin-bottom:56px; }
+.foot-ticker{ display:flex; gap:0; animation:ticker 28s linear infinite; white-space:nowrap; }
+.foot-ticker:hover{ animation-play-state:paused; }
+.foot-ticker span{ font-family:var(--ff-mono); font-size:12px; letter-spacing:.18em; color:var(--text-dim); padding:0 40px; text-transform:uppercase; }
+.foot-ticker span em{ color:var(--accent); font-style:normal; }
+@keyframes ticker{ 0%{transform:translateX(0);} 100%{transform:translateX(-50%);} }
+
+.foot-links{ display:flex; gap:56px; flex-wrap:wrap; margin-bottom:60px; }
+.foot-col h4{ font-family:var(--ff-mono); font-size:10px; letter-spacing:.2em; color:var(--accent); text-transform:uppercase; margin-bottom:16px; }
+.shuffle{ display:block; font-size:14px; color:var(--text-soft); padding:5px 0; cursor:default; transition:color .2s; }
+.shuffle:hover{ color:var(--text); }
+
+/* Animated bottom bar */
+.foot-bottom{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; padding-top:28px; border-top:1px solid var(--line); font-family:var(--ff-mono); font-size:11px; color:var(--text-dim); }
+.status-pill{ display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:100px; padding:7px 14px; }
+.status-pill i{ width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse-led 2.4s ease-in-out infinite; }
+
+/* ── TRANSITION OVERLAY ── */
+#trans-overlay{
+  position:fixed; inset:0; z-index:999; pointer-events:none;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0;
+}
+#trans-bg{ position:absolute; inset:0; background:var(--accent); transform:scaleY(0); transform-origin:bottom; }
+#trans-logo{ position:relative; font-family:var(--ff-display); font-weight:600; font-size:32px; color:var(--on-accent); opacity:0; letter-spacing:-.01em; }
+
+/* ── PAGE SECTION TRANSITION ELEMENTS ── */
+.section-enter-scrim{
+  position:absolute; inset:0; z-index:3;
+  background:var(--bg);
+  transform-origin:top;
+  pointer-events:none;
+}
+
+/* Horizontal scroll panel content reveal */
+.h-content{ width:100%; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:760px){
+  .wrap{ padding:0 20px; }
+  .h-nav{ display:none; }
+}
+@media(prefers-reduced-motion:reduce){
+  *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor-dot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-label" id="cursorLabel"></div>
+
+<!-- transition overlay -->
+<div id="trans-overlay">
+  <div id="trans-bg"></div>
+  <div id="trans-logo">VAULT<em style="font-style:italic;opacity:.7">OS</em></div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="wrap topbar-row">
+    <a class="brand" href="#hero"><span class="led"></span>VAULT<span>OS</span></a>
+    <div class="theme-controls">
+      <!-- color picker -->
+      <div class="color-picker-wrap" id="colorPickerWrap">
+        <button class="color-picker-btn" id="colorPickerBtn" title="Color scheme">
+          <span class="btn-swatch-ring"></span>
+        </button>
+        <div class="color-dropdown" id="colorDropdown">
+          <span class="color-dropdown-label">Choose accent</span>
+          <div class="swatch-grid" id="swatches"></div>
+        </div>
+      </div>
+      <!-- mode toggle -->
+      <button class="mode-toggle" id="modeToggle" title="Toggle light / dark">
+        <svg id="modeIcon" viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="4.2"/></svg>
+      </button>
+      <button class="login-btn" id="loginBtn">Login</button>
+    </div>
+  </div>
+</header>
+
+<div class="blob" id="blob"></div>
+
+<div id="main-scroll">
+
+  <!-- HERO -->
+  <section class="v-section" id="hero">
+    <div class="wrap stage-inner">
+      <div class="eyebrow">PRIVATE KNOWLEDGE INFRASTRUCTURE</div>
+      <h1 class="hero-h1">
+        <span class="tilt-word" data-reveal="🔒 whitelist only|🔒 invite-gated">Your</span>
+        <span class="tilt-word">knowledge.</span><br>
+        <span class="tilt-word" data-reveal="🔐 role-based|🔐 four access tiers">Locked,</span>
+        <span class="tilt-word" data-reveal="🗂️ unlimited nesting|🗂️ spaces & folders">organized,</span>
+        <span class="tilt-word"><em data-reveal="📈 reading analytics|📈 completion tracking">alive.</em></span>
+      </h1>
+      <p class="hero-sub">Vault OS is the private workspace where your notes, research, and documentation live behind real access control — roles, whitelists, and a full audit trail. Not just a login screen.</p>
+      <div class="hero-cta-row">
+        <button class="login-btn" id="loginBtn2">Start reading</button>
+        <button class="btn-ghost" id="exploreBtn">Explore features ↓</button>
+      </div>
+    </div>
+    <div class="scroll-cue"><div class="ln"></div>SCROLL</div>
+  </section>
+
+  <!-- HORIZONTAL SCROLL OUTER -->
+  <div id="horiz-outer">
+    <!-- nav -->
+    <button class="h-nav prev" id="hPrev"><svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg></button>
+    <button class="h-nav next" id="hNext"><svg viewBox="0 0 24 24"><polyline points="9,18 15,12 9,6"/></svg></button>
+
+    <div id="horiz-track">
+
+      <!-- PANEL 1: What's inside (overview) -->
+      <div class="h-panel" id="hp1">
+        <div class="wrap h-content">
+          <div class="h-panel-eyebrow from-right">What's inside</div>
+          <h2 class="h-panel-title from-right">Six systems.<br><em>One vault.</em></h2>
+          <p class="h-panel-body from-right">Every layer of Vault OS was designed with one constraint: nothing leaks. From the role engine to the audit trail, access is a first principle — not a bolt-on.</p>
+          <div class="feat-grid">
+            <div class="feat-card wide from-right" data-reveal="4 roles: God Admin → Viewer">
+              <span class="feat-num mono">01</span>
+              <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg></div>
+              <div class="feat-name">Roles & access<span class="dup">Roles & access</span></div>
+              <p>God Admin, Admin, Editor, Viewer — a fixed boundary for every action.</p>
+            </div>
+            <div class="feat-card from-right" data-reveal="unlimited depth">
+              <span class="feat-num mono">02</span>
+              <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 13h7v7h-7zM11 7h6M7 11v6"/></svg></div>
+              <div class="feat-name">Nested spaces<span class="dup">Nested spaces</span></div>
+              <p>Space → Folder → Topic → Document, nested as deep as you need.</p>
+            </div>
+            <div class="feat-card from-right" data-reveal="markdown + MDX">
+              <span class="feat-num mono">03</span>
+              <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M4 19h16M6 17l1-4 10-10 3 3-10 10-4 1z"/></svg></div>
+              <div class="feat-name">Markdown editor<span class="dup">Markdown editor</span></div>
+              <p>Split view, live preview, autosave on every keystroke that matters.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: Features continued -->
+      <div class="h-panel" id="hp2">
+        <div class="wrap h-content">
+          <div class="h-panel-eyebrow from-right">More capabilities</div>
+          <h2 class="h-panel-title from-right">Everything a <em>serious reader</em><br>actually needs.</h2>
+          <div class="feat-grid" style="margin-top:36px;">
+            <div class="feat-card from-right" data-reveal="every action logged">
+              <span class="feat-num mono">04</span>
+              <div class="feat-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></div>
+              <div class="feat-name">Audit trail<span class="dup">Audit trail</span></div>
+              <p>Login, edit, delete, permission change — timestamped and attributable.</p>
+            </div>
+            <div class="feat-card from-right" data-reveal="instant results">
+              <span class="feat-num mono">05</span>
+              <div class="feat-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+              <div class="feat-name">Instant search<span class="dup">Instant search</span></div>
+              <p>Across spaces, folders, topics, documents, and tags — as you type.</p>
+            </div>
+            <div class="feat-card from-right" data-reveal="try the swatches above ↑">
+              <span class="feat-num mono">06</span>
+              <div class="feat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18z" fill="currentColor" stroke="none" opacity=".4"/></svg></div>
+              <div class="feat-name">Live themes<span class="dup">Live themes</span></div>
+              <p>15 color palettes, each tuned for light and dark. Switch live from the toolbar above.</p>
+            </div>
+            <div class="feat-card from-right" data-reveal="spaced repetition built-in">
+              <span class="feat-num mono">07</span>
+              <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+              <div class="feat-name">Revision scheduler<span class="dup">Revision scheduler</span></div>
+              <p>SM-2 spaced repetition built into every document. Never forget what you read.</p>
+            </div>
+            <div class="feat-card from-right" data-reveal="track mastery by topic">
+              <span class="feat-num mono">08</span>
+              <div class="feat-icon"><svg viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div>
+              <div class="feat-name">Mastery tracking<span class="dup">Mastery tracking</span></div>
+              <p>Mark confidence levels. Vault surfaces what to revisit so your knowledge compounds.</p>
+            </div>
+            <div class="feat-card from-right" data-reveal="never lose context">
+              <span class="feat-num mono">09</span>
+              <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div>
+              <div class="feat-name">Streak tracking<span class="dup">Streak tracking</span></div>
+              <p>Daily reading streaks with heatmaps. Consistency visualized, momentum rewarded.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 3: Stats -->
+      <div class="h-panel" id="hp3">
+        <div class="wrap h-content">
+          <div class="h-panel-eyebrow from-right">By the numbers</div>
+          <h2 class="h-panel-title from-right">Built for depth,<br><em>not breadth.</em></h2>
+          <p class="h-panel-body from-right">Vault OS is deliberately private. There's no public feed, no follower count, no engagement metric. Just you, your knowledge, and the systems that protect it.</p>
+          <div class="stats-row">
+            <div class="stat from-right">
+              <div class="stat-num" data-count="15">0</div>
+              <div class="stat-label">Color schemes</div>
+            </div>
+            <div class="stat from-right">
+              <div class="stat-num" data-count="4">0</div>
+              <div class="stat-label">Access roles</div>
+            </div>
+            <div class="stat from-right">
+              <div class="stat-num" data-count="∞">∞</div>
+              <div class="stat-label">Nesting depth</div>
+            </div>
+            <div class="stat from-right">
+              <div class="stat-num" data-count="100">0</div>
+              <div class="stat-label">% Audit coverage</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 4: Philosophy -->
+      <div class="h-panel" id="hp4">
+        <div class="wrap h-content">
+          <div class="h-panel-eyebrow from-right">Design philosophy</div>
+          <h2 class="h-panel-title from-right">Why Vault OS<br>feels <em>different.</em></h2>
+          <div class="phil-list">
+            <div class="phil-item from-right">
+              <span class="phil-n">01</span>
+              <div class="phil-text">
+                <h4>Access is not a feature — it's the foundation</h4>
+                <p>Most tools bolt on permissions late. We built the role engine first, then the product around it.</p>
+              </div>
+            </div>
+            <div class="phil-item from-right">
+              <span class="phil-n">02</span>
+              <div class="phil-text">
+                <h4>Reading is a practice, not a transaction</h4>
+                <p>Streaks, mastery scores, and revision schedules exist because knowledge compounds when you return to it.</p>
+              </div>
+            </div>
+            <div class="phil-item from-right">
+              <span class="phil-n">03</span>
+              <div class="phil-text">
+                <h4>One reader at the center</h4>
+                <p>No public profile. No feed. No notifications. Vault is optimized for the depth of one person's thinking.</p>
+              </div>
+            </div>
+            <div class="phil-item from-right">
+              <span class="phil-n">04</span>
+              <div class="phil-text">
+                <h4>Everything is auditable, nothing is opaque</h4>
+                <p>Every action — read, edit, permission change — is timestamped. You always know what happened and who did it.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end track -->
+
+    <!-- panel progress dots -->
+    <div class="h-progress" id="hProgress">
+      <div class="h-dot active"></div>
+      <div class="h-dot"></div>
+      <div class="h-dot"></div>
+      <div class="h-dot"></div>
+    </div>
+
+  </div><!-- end horiz-outer -->
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <div class="footer-bg-grid"></div>
+    <div class="footer-glow"></div>
+    <div class="wrap foot-inner">
+      <div class="foot-top">
+        <h3 class="foot-title">Your second brain<br>deserves <em>a lock.</em></h3>
+        <button class="login-btn" id="loginBtn3" style="font-size:14px;padding:14px 32px;">Get access</button>
+      </div>
+
+      <!-- Ticker -->
+      <div class="foot-ticker-wrap">
+        <div class="foot-ticker">
+          <span>VAULT<em> OS</em></span><span>•</span>
+          <span>PRIVATE KNOWLEDGE</span><span>•</span>
+          <span>ROLES &amp; ACCESS</span><span>•</span>
+          <span>SPACED REPETITION</span><span>•</span>
+          <span>AUDIT TRAIL</span><span>•</span>
+          <span>LIVE THEMES</span><span>•</span>
+          <span>MASTERY TRACKING</span><span>•</span>
+          <span>STREAK ENGINE</span><span>•</span>
+          <!-- duplicate for seamless loop -->
+          <span>VAULT<em> OS</em></span><span>•</span>
+          <span>PRIVATE KNOWLEDGE</span><span>•</span>
+          <span>ROLES &amp; ACCESS</span><span>•</span>
+          <span>SPACED REPETITION</span><span>•</span>
+          <span>AUDIT TRAIL</span><span>•</span>
+          <span>LIVE THEMES</span><span>•</span>
+          <span>MASTERY TRACKING</span><span>•</span>
+          <span>STREAK ENGINE</span><span>•</span>
+        </div>
+      </div>
+
+      <div class="foot-links">
+        <div class="foot-col"><h4>Product</h4>
+          <a class="shuffle" href="#">Spaces</a>
+          <a class="shuffle" href="#">Editor</a>
+          <a class="shuffle" href="#">Search</a>
+          <a class="shuffle" href="#">Themes</a>
+        </div>
+        <div class="foot-col"><h4>Learning</h4>
+          <a class="shuffle" href="#">Mastery scores</a>
+          <a class="shuffle" href="#">Revision scheduler</a>
+          <a class="shuffle" href="#">Streak tracking</a>
+        </div>
+        <div class="foot-col"><h4>Access</h4>
+          <a class="shuffle" href="#">Roles</a>
+          <a class="shuffle" href="#">Whitelist</a>
+          <a class="shuffle" href="#">Audit logs</a>
+        </div>
+        <div class="foot-col"><h4>System</h4>
+          <a class="shuffle" href="#">Status</a>
+          <a class="shuffle" href="#">Changelog</a>
+          <a class="shuffle" href="#">Roadmap</a>
+        </div>
+      </div>
+
+      <div class="foot-bottom">
+        <span>© 2026 VAULT OS — BUILT FOR ONE READER: YOU.</span>
+        <div class="status-pill"><i></i><span id="themeName">EMERALD / DARK</span></div>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- end main-scroll -->
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+const reduceMotion = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+const root = document.documentElement;
+
+/* ════════════════════════════════
+   THEME SYSTEM
+════════════════════════════════ */
+const palettes = [
+  {name:'Emerald', hue:152}, {name:'Mint', hue:165}, {name:'Turquoise', hue:178},
+  {name:'Teal', hue:190}, {name:'Sky', hue:200}, {name:'Sapphire', hue:212},
+  {name:'Cobalt', hue:225}, {name:'Indigo', hue:243}, {name:'Violet', hue:265},
+  {name:'Fuchsia', hue:290}, {name:'Magenta', hue:310}, {name:'Rose', hue:330},
+  {name:'Crimson', hue:350}, {name:'Amber', hue:38}, {name:'Lime', hue:90}
+];
+let currentHue = 152, currentMode = 'dark', currentName = 'Emerald';
+const swatchWrap = document.getElementById('swatches');
+
+palettes.forEach(p => {
+  const d = document.createElement('div');
+  d.className = 'swatch' + (p.hue === currentHue ? ' active' : '');
+  d.style.background = `hsl(${p.hue} 75% 52%)`;
+  d.title = p.name;
+  d.addEventListener('click', () => setTheme(p.hue, p.name, currentMode));
+  swatchWrap.appendChild(d);
+});
+
+function setTheme(hue, name, mode){
+  currentHue = hue; currentMode = mode; currentName = name;
+  root.style.setProperty('--hue', hue);
+  root.setAttribute('data-mode', mode);
+  document.querySelectorAll('.swatch').forEach((s,i) => s.classList.toggle('active', palettes[i].hue === hue));
+  document.getElementById('themeName').textContent = `${name.toUpperCase()} / ${mode.toUpperCase()}`;
+}
+setTheme(152, 'Emerald', 'dark');
+
+// mode toggle
+document.getElementById('modeToggle').addEventListener('click', () => {
+  const newMode = currentMode === 'dark' ? 'light' : 'dark';
+  const icon = document.getElementById('modeIcon');
+  if(newMode === 'light'){
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+  } else {
+    icon.innerHTML = '<path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="4.2"/>';
+  }
+  setTheme(currentHue, currentName, newMode);
+});
+
+// color picker dropdown
+const cpBtn = document.getElementById('colorPickerBtn');
+const cpDrop = document.getElementById('colorDropdown');
+cpBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  cpDrop.classList.toggle('open');
+});
+document.addEventListener('click', () => cpDrop.classList.remove('open'));
+cpDrop.addEventListener('click', e => e.stopPropagation());
+
+/* ════════════════════════════════
+   CURSOR
+════════════════════════════════ */
+const dot = document.querySelector('.cursor-dot');
+const ring = document.getElementById('cursorRing');
+const label = document.getElementById('cursorLabel');
+if(!('ontouchstart' in window)){
+  window.addEventListener('mousemove', e => {
+    gsap.to(dot,  {x:e.clientX, y:e.clientY, duration:.05});
+    gsap.to(ring, {x:e.clientX, y:e.clientY, duration:.28, ease:'power3.out'});
+    gsap.to(label,{x:e.clientX+18, y:e.clientY+22, duration:.12});
+  });
+  document.querySelectorAll('a,button,.feat-card').forEach(el => {
+    el.addEventListener('mouseenter', () => gsap.to(ring,{width:52,height:52,duration:.25}));
+    el.addEventListener('mouseleave', () => gsap.to(ring,{width:32,height:32,duration:.25}));
+  });
+  document.querySelectorAll('[data-reveal]').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      const opts = el.dataset.reveal.split('|');
+      label.textContent = opts[Math.floor(Math.random()*opts.length)];
+      gsap.to(label,{opacity:1,scale:1,duration:.28,ease:'back.out(2)'});
+    });
+    el.addEventListener('mouseleave', () => gsap.to(label,{opacity:0,scale:.8,duration:.18}));
+  });
+}
+
+/* ════════════════════════════════
+   AMBIENT BLOB
+════════════════════════════════ */
+const blob = document.getElementById('blob');
+if(!reduceMotion){
+  window.addEventListener('mousemove', e => {
+    gsap.to(blob, {x:e.clientX, y:e.clientY, duration:1.2, ease:'power2.out'});
+  });
+}
+
+/* ════════════════════════════════
+   MAGNETIC BUTTONS
+════════════════════════════════ */
+function magnetize(el, s=0.28){
+  el.addEventListener('mousemove', e => {
+    const r = el.getBoundingClientRect();
+    gsap.to(el,{x:(e.clientX-r.left-r.width/2)*s, y:(e.clientY-r.top-r.height/2)*s, duration:.35, ease:'power3.out'});
+  });
+  el.addEventListener('mouseleave', () => gsap.to(el,{x:0,y:0,duration:.55,ease:'elastic.out(1,.4)'}));
+}
+document.querySelectorAll('.login-btn,.btn-ghost').forEach(b => magnetize(b));
+
+/* ════════════════════════════════
+   TILT WORDS
+════════════════════════════════ */
+document.querySelectorAll('.tilt-word').forEach(w => {
+  w.addEventListener('mouseenter', () => {
+    gsap.to(w,{scale:1.07, skewX:gsap.utils.random(-6,6), color:'var(--accent)', duration:.3, ease:'power3.out'});
+  });
+  w.addEventListener('mouseleave', () => {
+    gsap.to(w,{scale:1, skewX:0, color:'inherit', duration:.45, ease:'elastic.out(1,.5)'});
+  });
+});
+
+/* ════════════════════════════════
+   SHUFFLE HOVER (footer links)
+════════════════════════════════ */
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&*";
+document.querySelectorAll('.shuffle').forEach(el => {
+  const original = el.textContent;
+  el.addEventListener('mouseenter', () => {
+    let frame = 0;
+    clearInterval(el._int);
+    el._int = setInterval(() => {
+      el.textContent = original.split('').map((c,i) => i < frame ? c : chars[Math.floor(Math.random()*chars.length)]).join('');
+      frame++;
+      if(frame > original.length){ clearInterval(el._int); el.textContent = original; }
+    }, 28);
+  });
+});
+
+/* ════════════════════════════════
+   HERO ENTRANCE
+════════════════════════════════ */
+if(!reduceMotion){
+  gsap.set('.tilt-word',{yPercent:130, scale:1.35, opacity:0});
+  gsap.to('.tilt-word',{yPercent:0, scale:1, opacity:1, duration:1.05, stagger:.065, ease:'power4.out', delay:.1});
+  gsap.from('.eyebrow',{opacity:0, y:14, duration:.7, delay:.05});
+  gsap.from('.hero-sub',{opacity:0, y:18, duration:.75, delay:.65});
+  gsap.from('.hero-cta-row',{opacity:0, y:18, duration:.75, delay:.8});
+  gsap.from('.scroll-cue',{opacity:0, duration:.7, delay:1.1});
+}
+
+/* ════════════════════════════════
+   SECTION MORPH TRANSITIONS
+   Hero shrinks → next section grows
+════════════════════════════════ */
+// Hero section: shrinks (scale down + fade) as user scrolls
+if(!reduceMotion){
+  ScrollTrigger.create({
+    trigger:'#hero',
+    start:'top top',
+    end:'bottom top',
+    scrub:1.2,
+    onUpdate(self){
+      const p = self.progress;
+      // hero content collapses inward
+      gsap.set('#hero .stage-inner', {
+        scale: 1 - p * 0.08,
+        opacity: 1 - p * 1.1,
+        y: p * -40
+      });
+    }
+  });
+
+  // hero exit: a red "curtain" reveals from top as we leave
+  ScrollTrigger.create({
+    trigger:'#hero',
+    start:'60% top',
+    end:'bottom -10%',
+    scrub:.9,
+    onEnter(){ /* nothing – handled by onUpdate */ },
+    onUpdate(self){
+      const p = self.progress;
+      gsap.set('#hero',{ clipPath:`inset(0 0 ${p*100}% 0 round 0px)` });
+    }
+  });
+}
+
+/* ════════════════════════════════
+   HORIZONTAL SCROLL SYSTEM
+════════════════════════════════ */
+const horizOuter = document.getElementById('horiz-outer');
+const track      = document.getElementById('horiz-track');
+const panels     = Array.from(track.querySelectorAll('.h-panel'));
+const dots       = Array.from(document.querySelectorAll('.h-dot'));
+const PANEL_W    = () => window.innerWidth;
+const N          = panels.length;
+let currentPanel = 0;
+let horizLocked  = false;
+
+// Size the outer container to pin for (N) panels worth of scroll
+function sizeHorizOuter(){
+  horizOuter.style.height = `${N * 100}vh`;
+}
+sizeHorizOuter();
+window.addEventListener('resize', () => { sizeHorizOuter(); ScrollTrigger.refresh(); });
+
+// Panel indicator update
+function updateDots(idx){
+  dots.forEach((d,i) => d.classList.toggle('active', i === idx));
+}
+
+// Animate panel content in from the right
+function revealPanel(idx){
+  const panel = panels[idx];
+  const els   = panel.querySelectorAll('.from-right');
+  gsap.fromTo(els,
+    { x:90, opacity:0 },
+    { x:0,  opacity:1, duration:.75, stagger:.08, ease:'power3.out', clearProps:'all' }
+  );
+}
+
+// Count-up for stats
+function countUp(el){
+  const target = parseInt(el.dataset.count);
+  if(isNaN(target)) return;
+  gsap.fromTo(el,{textContent:0},{
+    textContent: target,
+    duration:1.4, ease:'power3.out', snap:{textContent:1},
+    onUpdate(){ el.textContent = Math.round(Number(el.textContent)); }
+  });
+}
+
+// Pin horizontal track
+ScrollTrigger.create({
+  trigger: horizOuter,
+  start:  'top top',
+  end:    `+=${(N-1) * window.innerHeight * 100}%`,
+  pin:    true,
+  pinSpacing: false,
+  scrub:  false,
+  onToggle(self){
+    if(self.isActive){
+      revealPanel(0);
+    }
+  }
+});
+
+// Scroll-driven translation — each 100vh of scroll = one panel
+const totalScrollPx = () => (N - 1) * window.innerHeight;
+
+ScrollTrigger.create({
+  trigger:   horizOuter,
+  start:     'top top',
+  end:       () => `+=${totalScrollPx()}`,
+  scrub:     1.4,
+  onUpdate(self){
+    const exactPanel = self.progress * (N - 1);
+    const idx = Math.round(exactPanel);
+    const x   = -exactPanel * PANEL_W();
+    gsap.set(track, { x });
+
+    if(idx !== currentPanel){
+      currentPanel = idx;
+      updateDots(idx);
+      revealPanel(idx);
+      // count-up stats when panel 3 (idx 2) arrives
+      if(idx === 2){
+        panels[2].querySelectorAll('.stat-num[data-count]').forEach(countUp);
+      }
+    }
+  }
+});
+
+// Nav buttons
+document.getElementById('hPrev').addEventListener('click', () => {
+  if(currentPanel <= 0) return;
+  scrollToPanel(currentPanel - 1);
+});
+document.getElementById('hNext').addEventListener('click', () => {
+  if(currentPanel >= N-1) return;
+  scrollToPanel(currentPanel + 1);
+});
+
+function scrollToPanel(idx){
+  const outerTop  = horizOuter.getBoundingClientRect().top + window.scrollY;
+  const target    = outerTop + idx * window.innerHeight;
+  window.scrollTo({ top: target, behavior:'smooth' });
+}
+
+// Reveal first panel immediately
+revealPanel(0);
+
+/* ════════════════════════════════
+   FOOTER ANIMATIONS
+════════════════════════════════ */
+ScrollTrigger.create({
+  trigger:'#footer',
+  start:'top 85%',
+  onEnter(){
+    gsap.from('.foot-title',{y:50, opacity:0, duration:.9, ease:'power3.out'});
+    gsap.from('.foot-links .foot-col',{y:30, opacity:0, duration:.7, stagger:.1, ease:'power3.out', delay:.2});
+    gsap.from('.foot-bottom',{y:20, opacity:0, duration:.6, delay:.5});
+    gsap.from('.foot-ticker-wrap',{scaleX:0, opacity:0, duration:.8, ease:'power3.out', delay:.1, transformOrigin:'left'});
+    gsap.from('#loginBtn3',{scale:.8, opacity:0, duration:.6, ease:'back.out(2)', delay:.3});
+  }
+});
+
+/* ════════════════════════════════
+   EXPLORE BUTTON
+════════════════════════════════ */
+document.getElementById('exploreBtn').addEventListener('click', () => {
+  const target = horizOuter.getBoundingClientRect().top + window.scrollY;
+  window.scrollTo({ top: target, behavior: reduceMotion ? 'auto' : 'smooth' });
+});
+
+/* ════════════════════════════════
+   LOGIN BUTTONS
+════════════════════════════════ */
+['loginBtn','loginBtn2','loginBtn3'].forEach(id => {
+  const b = document.getElementById(id);
+  if(b) b.addEventListener('click', () => alert('Login flow goes here — connect your auth provider.'));
+});
+
+window.addEventListener('load', () => ScrollTrigger.refresh());
+</script>
+</body>
+</html>
