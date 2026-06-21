@@ -4,7 +4,6 @@ import { AppSidebar } from '../components/AppSidebar';
 import { Editor } from '../components/Editor';
 import { useNodeStore } from '../store/nodeStore';
 import { exportNodeToZip } from '../lib/exportUtils';
-import { useAuthStore } from '../store/authStore';
 
 function EditorRouteWrapper() {
   const { pathname } = window.location;
