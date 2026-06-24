@@ -8,7 +8,7 @@ import { exportNodeToZip } from '../lib/exportUtils';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-export function Editor({ nodeId }: { nodeId: string }) {
+export function Editor({ nodeId, isSidebarCollapsed }: { nodeId: string; isSidebarCollapsed?: boolean }) {
   const { nodes, updateNode } = useNodeStore();
   const { profile } = useAuthStore();
   const node = nodes.find(n => n.id === nodeId);
@@ -163,7 +163,7 @@ export function Editor({ nodeId }: { nodeId: string }) {
     <div className="h-full flex flex-col bg-[#050505] text-white overflow-hidden">
       
       {/* Top Header */}
-      <div className="h-14 border-b border-[#333] flex items-center justify-between px-6 shrink-0 bg-[#0a0a0a]">
+      <div className={`h-14 border-b border-[#333] flex items-center justify-between px-6 shrink-0 bg-[#0a0a0a] transition-all duration-300 ${isSidebarCollapsed ? 'pl-16' : ''}`}>
         <input 
           value={title}
           onChange={handleTitleChange}
