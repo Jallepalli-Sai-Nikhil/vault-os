@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useParams } from 'react-router-dom';
 import { AppSidebar } from '../components/AppSidebar';
 import { Editor } from '../components/Editor';
 import { useNodeStore } from '../store/nodeStore';
 import { exportNodeToZip } from '../lib/exportUtils';
 
 function EditorRouteWrapper() {
-  const { pathname } = window.location;
-  const id = pathname.split('/node/')[1];
+  const { id } = useParams<{ id: string }>();
+  if (!id) return null;
   return <Editor nodeId={id} key={id} />;
 }
 

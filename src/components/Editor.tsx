@@ -16,6 +16,7 @@ export function Editor({ nodeId }: { nodeId: string }) {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [saving, setSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -23,6 +24,7 @@ export function Editor({ nodeId }: { nodeId: string }) {
     if (node) {
       setContent(node.content || '');
       setTitle(node.title || '');
+      setIsDirty(false);
     }
   }, [node?.id]);
 
@@ -32,22 +34,35 @@ export function Editor({ nodeId }: { nodeId: string }) {
 
   const handleChange = (val: string) => {
     setContent(val);
-    setSaving(true);
+    setIsDirty(true);
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(async () => {
+      setSaving(true);
       await updateNode(node.id, { content: val, title });
       setSaving(false);
-    }, 1000);
+      setIsDirty(false);
+    }, 2000);
   };
 
   const handleTitleChange = (e: any) => {
     setTitle(e.target.value);
-    setSaving(true);
+    setIsDirty(true);
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(async () => {
+      setSaving(true);
       await updateNode(node.id, { content, title: e.target.value });
       setSaving(false);
-    }, 1000);
+      setIsDirty(false);
+    }, 2000);
+  };
+
+  const handleManualSave = async () => {
+    if (!isDirty) return;
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    setSaving(true);
+    await updateNode(node.id, { content, title });
+    setSaving(false);
+    setIsDirty(false);
   };
 
   const insertText = (before: string, after: string = '', defaultText: string = '') => {
@@ -157,7 +172,18 @@ export function Editor({ nodeId }: { nodeId: string }) {
           placeholder="Document Title"
         />
         <div className="flex items-center gap-4 shrink-0">
-          {saving && <span className="text-xs font-mono text-gray-500 flex items-center gap-1"><Save size={12} /> Autosaving...</span>}
+          <span className="text-xs font-mono text-gray-500 italic">
+            {saving ? 'Saving...' : isDirty ? 'Unsaved changes' : 'All changes saved'}
+          </span>
+          {canEdit && (
+            <button 
+              onClick={handleManualSave}
+              disabled={!isDirty || saving}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded transition-colors text-xs font-mono font-bold ${isDirty ? 'bg-[#66fcf1] text-black hover:bg-[#4ad9ce]' : 'bg-[#1a1a1a] text-gray-500 cursor-not-allowed border border-[#333]'}`}
+            >
+              <Save size={14} /> Save
+            </button>
+          )}
           <button 
             onClick={handleDownload}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[#111] hover:bg-[#222] border border-[#333] text-xs font-mono text-[#66fcf1] rounded transition-colors"
